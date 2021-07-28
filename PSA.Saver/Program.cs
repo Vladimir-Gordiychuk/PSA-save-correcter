@@ -263,11 +263,18 @@ namespace PSA.Saver
             using (var stream = file.Open(FileMode.Open, FileAccess.Read)) {
                 var reader = new StreamReader(stream);
                 var text = reader.ReadToEnd();
+                var builder = new StringBuilder(text);
 
                 var vksRegex = new Regex(@"<\?\w+>");
-                text = vksRegex.Replace(text, "blob");
+                var matches = vksRegex.Matches(text);
 
-                return XDocument.Parse(text);
+                foreach (Match match in matches)
+                {
+                    builder[match.Index] = '#';
+                    builder[match.Index + match.Length] = '#';
+                }
+
+                return XDocument.Parse(builder.ToString());
             }
         }
     }
