@@ -23,8 +23,7 @@ namespace PSA.Saver
                 var patch = LoadUnitMapCsvFile(new FileInfo("unit_map.csv"));
                 MergeUnitMaps(PlayerIdMap, patch);
 
-                const string path = "../../../samples/save18.xml";
-                var file = new FileInfo(path);
+                var file = new FileInfo(args[0]);
                 var doc = Load(file);
                 var elements = FindPlayerIdElements(GetTacticLevelModule(doc)).ToList();
 
@@ -49,7 +48,8 @@ namespace PSA.Saver
                     }
                 }
 
-                Save(doc, new FileInfo(file.FullName + "_"));
+                Save(doc, new FileInfo(Path.Combine(file.Directory.FullName,
+                    Path.GetFileNameWithoutExtension(file.Name) + "_" + file.Extension)));
             }
             catch (Exception e)
             {

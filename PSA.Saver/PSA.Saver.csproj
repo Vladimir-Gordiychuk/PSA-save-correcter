@@ -48,7 +48,11 @@
     <Compile Include="PsaUnits.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="updates.txt" />
     <None Include="App.config" />
+    <Content Include="README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="unit_map.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
