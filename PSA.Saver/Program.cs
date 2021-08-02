@@ -60,13 +60,12 @@ namespace PSA.Saver
 
                         if (correctedPlayerId.HasValue)
                         {
-                            item.Attribute("value").Value = correctedPlayerId.ToString();
-                            Console.WriteLine("Fixed {0} record: {1} -> {2}", modification, oldValue, DeterminePlayerId(modification));
+                            item.Attribute("value").Value = correctedPlayerId.Value.ToString();
+                            //Console.WriteLine("Fixed {0} record: {1} -> {2}", modification, oldValue, correctedPlayerId.Value);
                         }
                         else
                         {
-                            Console.WriteLine("Invalid PlayerId found but no 'model->id' match found in unit map.");
-                            Console.WriteLine("Consider adding new record to 'unit_map.csv' file for the following modification '{0}'.", modification);
+                            Console.WriteLine("Invalid PlayerId found but no match for '{0}' found in unit map.", modification);
                         }
                     }
                 }
