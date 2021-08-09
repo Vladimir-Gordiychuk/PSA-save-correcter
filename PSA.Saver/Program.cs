@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -39,6 +40,11 @@ namespace PSA.Saver
             {
                 Out = Console.Out
             };
+
+            if (!string.IsNullOrWhiteSpace(Config.AttrConvPath))
+            {
+                saver.AttrConv = new FileInfo(Config.AttrConvPath);
+            }
 
             var unitMapFile = new FileInfo("unit_map.csv");
             if (unitMapFile.Exists)

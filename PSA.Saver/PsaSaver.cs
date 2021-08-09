@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml.Linq;
 
 namespace PSA.Saver
@@ -15,9 +17,33 @@ namespace PSA.Saver
 
         public TextWriter Out { get; set; }
 
+        public FileInfo AttrConv { get; set; }
+
         public void FixSave(FileInfo file)
         {
+            if (IsBinarySaveFile(file))
+            {
+                Out.WriteLine("Save file has a binary (packed) format.");
+                if (AttrConv != null && AttrConv.Exists)
+                {
+                    Out.WriteLine("Trying to unpack it with AttrConv. Administrator priviliges are required.");
+
+                    // Wait for file system to make this file available.
+                    Thread.Sleep(300);
+                    UnpackSaveFile(file, AttrConv);
+                    // And again, wait for file system to make this file available.
+                    Thread.Sleep(300);
+                }
+            }
+
             var doc = Load(file);
+
+            var tacticModule = GetTacticLevelModule(doc);
+            if (tacticModule == null)
+            {
+                Out.WriteLine("Save file does not contain a TacticModule (probably, there were no battles yet.");
+            }
+
             var elements = FindPlayerIdElements(GetTacticLevelModule(doc))
                 .Where(item => !IsValidPlayerIdElement(item) && GetModification(item) != null)
                 .ToList();
@@ -213,6 +239,36 @@ namespace PSA.Saver
 
             text = builder.ToString();
             return text;
+        }
+
+        public static bool IsBinarySaveFile(Stream file)
+        {
+            file.Seek(0, SeekOrigin.Begin);
+            var header = new byte[4];
+            file.Read(header, 0, 4);
+            return header.SequenceEqual(new byte[] { 31, 139, 8, 0 });
+        }
+
+        public static void UnpackSaveFile(FileInfo file, FileInfo attrConv = null)
+        {
+            var processStartInfo = new ProcessStartInfo()
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                FileName = attrConv.FullName,
+                Arguments = "\"" + file.FullName + "\""
+            };
+            var process = new Process() { StartInfo = processStartInfo };
+            process.Start();
+            process.WaitForExit();
+        }
+
+        public static bool IsBinarySaveFile(FileInfo file)
+        {
+            using (var stream = file.Open(FileMode.Open, FileAccess.Read))
+            {
+                return IsBinarySaveFile(stream);
+            }
         }
 
         public static XDocument Load(FileInfo file)
